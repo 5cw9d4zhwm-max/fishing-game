@@ -137,7 +137,7 @@ function groupWeightsFor(boat) {
   if (boat.id === 'starter') return { common: 99 };
   if (boat.id === 'small') return { common: 66, rare: 33 };
   if (boat.id === 'medium') return { common: 50, rare: 32, legendary: 17 };
-  return { common: 47, rare: 31, legendary: 18 };
+  return { rare: 60, legendary: 36 };
 }
 function pickFish() {
   const boat = currentBoat();
