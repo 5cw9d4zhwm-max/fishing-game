@@ -42,6 +42,8 @@ let pendingTemperature = false;
 let pendingCatch = null;
 let castInProgress = false;
 let escapeTimer = null;
+let reelCountdownInterval = null;
+let reelTenthsRemaining = 15;
 
 function loadState() {
   try {
@@ -156,6 +158,20 @@ function pickFish() {
 function pickTemperatureCatch() { return TEMPERATURE_CATCHES[Math.floor(Math.random() * TEMPERATURE_CATCHES.length)]; }
 function pickTemperatureFact() { return TEMPERATURE_FACTS[Math.floor(Math.random() * TEMPERATURE_FACTS.length)]; }
 function pickCatch() { return state.temperatureEventCasts > 0 ? pickTemperatureCatch() : pickFish(); }
+function startReelTimer() {
+  const timer = document.querySelector('#reelTimer'); const value = document.querySelector('#reelTimerValue');
+  if (reelCountdownInterval !== null) window.clearInterval(reelCountdownInterval);
+  reelTenthsRemaining = 15; value.textContent = '1.5'; timer.hidden = false;
+  reelCountdownInterval = window.setInterval(() => {
+    reelTenthsRemaining = Math.max(0, reelTenthsRemaining - 1);
+    value.textContent = (reelTenthsRemaining / 10).toFixed(1);
+    if (reelTenthsRemaining === 0) { window.clearInterval(reelCountdownInterval); reelCountdownInterval = null; }
+  }, 100);
+}
+function stopReelTimer() {
+  if (reelCountdownInterval !== null) { window.clearInterval(reelCountdownInterval); reelCountdownInterval = null; }
+  document.querySelector('#reelTimer').hidden = true;
+}
 
 function playTone(frequency, duration = 0.1) {
   if (!state.soundOn || !window.AudioContext) return;
@@ -181,6 +197,7 @@ function castLine() {
     button.hidden = true;
     reelButton.hidden = false; reelButton.disabled = false; reelButton.focus();
     playTone(590, .14);
+    startReelTimer();
     escapeTimer = window.setTimeout(fishEscapes, 1500);
   }, 780);
 }
@@ -198,6 +215,7 @@ function reelInFish() {
   const reelButton = document.querySelector('#reelButton');
   const bobber = document.querySelector('#bobber');
   if (escapeTimer !== null) { window.clearTimeout(escapeTimer); escapeTimer = null; }
+  stopReelTimer();
   pendingCatch = null;
   castInProgress = false;
   reelButton.disabled = true; reelButton.textContent = '끌어올리는 중…';
@@ -213,6 +231,7 @@ function fishEscapes() {
   const reelButton = document.querySelector('#reelButton');
   const bobber = document.querySelector('#bobber'); const prompt = document.querySelector('#fishingPrompt');
   pendingCatch = null; castInProgress = false; escapeTimer = null;
+  stopReelTimer();
   bobber.classList.remove('active', 'bite');
   button.hidden = false; button.disabled = false; button.textContent = '낚싯대 던지기';
   reelButton.hidden = true; reelButton.disabled = true; reelButton.textContent = '릴 감기!';
