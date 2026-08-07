@@ -63,6 +63,7 @@ function fishById(id) { return FISH.find((fish) => fish.id === id); }
 function updateBalances() {
   document.querySelectorAll('#coinDisplay, #fishingCoins, #boatShopCoins, #storageCoins').forEach((element) => { element.textContent = formatCoins(state.coins); });
   document.querySelector('#fishingBoatName').textContent = currentBoat().name;
+  document.querySelector('#temperatureEmergency').hidden = state.temperatureEventCasts <= 0;
   const boatArt = document.querySelector('#boatArt');
   boatArt.className = `boat-art boat-${state.boat}`;
   boatArt.setAttribute('aria-label', `${currentBoat().name} 모습`);
