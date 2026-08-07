@@ -28,8 +28,15 @@ const TEMPERATURE_CATCHES = [
   { id: 'jellyfish', name: '해파리', rarity: '수온 상승', rarityLabel: '수온 상승 이벤트', price: -50, image: 'assets/jellyfish.jpg', color: '#cf6887', isTemperatureEvent: true, catchTitle: '해파리를 건져 올렸어요!' },
   { id: 'shark', name: '상어', rarity: '수온 상승', rarityLabel: '수온 상승 이벤트', price: -75, image: 'assets/shark.jpg', color: '#6078aa', isTemperatureEvent: true, catchTitle: '상어가 낚싯줄을 물었어요!' },
 ];
+const TEMPERATURE_FACTS = [
+  '1970년 이후 부산 앞바다의 수온 상승 추세가 지구 평균보다 최대 4배 빨라졌습니다. 국립수산과학원에 따르면 여름철 부산 앞바다 수온은 10년마다 평균 0.53도 올랐습니다.',
+  '부산 기장 연안에는 아열대 종의 출현이 크게 늘었습니다. 총 212종의 어류 중 깃털제비활치와 황조어 등을 포함한 아열대 종은 151종으로 확인됐으며, 2007년 조사와 비교하면 약 71% 증가한 수치입니다.',
+  '우리나라의 해파리는 주로 겨울과 봄에 번식하고 성장합니다. 지난 겨울과 봄의 따뜻한 수온은 해파리의 성장과 출현을 촉진했고, 노무라입깃해파리 같은 독성 해파리도 지난해보다 약 2주 빠르게 연안에 나타났습니다.',
+  '바다 수온이 상승하면서 부산 앞바다에서 상어가 잇따라 출몰하고 있습니다. 방어·전갱이·삼치 등 난류성 어종이 늘면서 먹이를 쫓던 상어가 연안으로 유입된 것으로 추정됩니다.',
+  '광어·우럭·참돔 등 주요 양식 어종은 수온이 28도를 넘으면 먹이 섭취가 줄고 스트레스가 급격히 증가합니다. 용존 산소량까지 감소하면 대규모 폐사로 이어질 가능성이 높습니다.',
+];
 const SAVE_KEY = 'blue-sea-fishing-save-v1';
-const defaultState = { coins: 0, boat: 'starter', ownedBoats: ['starter'], discovered: [], log: [], totalCatches: 0, totalEarned: 0, castsByBoat: { starter: 0 }, temperatureShown: [], temperatureEventCasts: 0, soundOn: true };
+const defaultState = { coins: 0, boat: 'starter', ownedBoats: ['starter'], discovered: [], log: [], totalCatches: 0, totalEarned: 0, castsByBoat: { starter: 0 }, temperatureShown: [], temperatureEventCasts: 0, temperatureFact: '', soundOn: true };
 let state = loadState();
 let pendingTemperature = false;
 let pendingCatch = null;
@@ -142,6 +149,7 @@ function pickFish() {
   return weights.find((item) => (cursor += item.weight) >= roll).fish;
 }
 function pickTemperatureCatch() { return TEMPERATURE_CATCHES[Math.floor(Math.random() * TEMPERATURE_CATCHES.length)]; }
+function pickTemperatureFact() { return TEMPERATURE_FACTS[Math.floor(Math.random() * TEMPERATURE_FACTS.length)]; }
 function pickCatch() { return state.temperatureEventCasts > 0 ? pickTemperatureCatch() : pickFish(); }
 
 function playTone(frequency, duration = 0.1) {
@@ -189,14 +197,19 @@ function recordCatch(fish) {
   else if (!state.discovered.includes(fish.id)) state.discovered.push(fish.id);
   state.castsByBoat[state.boat] = (state.castsByBoat[state.boat] || 0) + 1;
   if (state.castsByBoat[state.boat] === 10 && !state.temperatureShown.includes(state.boat) && state.temperatureEventCasts === 0) {
-    state.temperatureShown.push(state.boat); state.temperatureEventCasts = 3; pendingTemperature = true;
+    state.temperatureShown.push(state.boat); state.temperatureEventCasts = 3; state.temperatureFact = pickTemperatureFact(); pendingTemperature = true;
   }
   saveState(); updateBalances(); playTone(fish.isTemperatureEvent ? 180 : fish.rarity === '황금' ? 860 : 700, .2);
 }
 function openModal(id) { document.querySelector('#modalBackdrop').hidden = false; document.querySelector(`#${id}`).hidden = false; }
+function openTemperatureModal() {
+  if (!state.temperatureFact) { state.temperatureFact = pickTemperatureFact(); saveState(); }
+  document.querySelector('#temperatureFact').textContent = state.temperatureFact;
+  openModal('temperatureModal');
+}
 function closeModal(id) {
   document.querySelector(`#${id}`).hidden = true;
-  if (id === 'catchModal' && pendingTemperature) { pendingTemperature = false; openModal('temperatureModal'); return; }
+  if (id === 'catchModal' && pendingTemperature) { pendingTemperature = false; openTemperatureModal(); return; }
   if (!document.querySelectorAll('.modal:not([hidden])').length) document.querySelector('#modalBackdrop').hidden = true;
 }
 function openCatchModal(fish) {
