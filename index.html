@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#061c2a" />
+    <title>푸른 바다 낚시</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="game-shell">
+      <section class="screen home-screen active" data-screen="home" aria-label="게임 메인 화면">
+        <div class="ocean-glow glow-one"></div>
+        <div class="ocean-glow glow-two"></div>
+        <header class="top-bar">
+          <button class="sound-button" id="soundButton" type="button" aria-pressed="true" title="효과음 켜기/끄기">♪</button>
+          <div class="wallet" aria-label="보유 전"><span>보유 전</span><strong id="coinDisplay">0전</strong></div>
+        </header>
+
+        <div class="home-content">
+          <button class="book-shortcut menu-button" type="button" data-open="fishBook">
+            <span class="menu-icon">▤</span><span>도감</span>
+          </button>
+
+          <div class="title-card golden-fish-card" aria-label="황금 고등어 그림">
+            <svg class="previous-fish-art" viewBox="0 0 240 140" role="img" aria-label="은은한 황금 고등어">
+              <defs>
+                <linearGradient id="goldFishBody" x1="0" x2="1" y1="0" y2="1">
+                  <stop offset="0" stop-color="#fff4b8" />
+                  <stop offset=".42" stop-color="#e6b744" />
+                  <stop offset="1" stop-color="#aa7223" />
+                </linearGradient>
+                <linearGradient id="goldFishTail" x1="0" x2="1">
+                  <stop stop-color="#d6a133" />
+                  <stop offset="1" stop-color="#8e6225" />
+                </linearGradient>
+                <linearGradient id="blueFishBody" x1="0" x2="1" y1="0" y2="1">
+                  <stop stop-color="#d9f5f4" />
+                  <stop offset=".5" stop-color="#62acc2" />
+                  <stop offset="1" stop-color="#2d718a" />
+                </linearGradient>
+                <linearGradient id="coralFishBody" x1="0" x2="1" y1="0" y2="1">
+                  <stop stop-color="#ffe4af" />
+                  <stop offset=".5" stop-color="#e99c5d" />
+                  <stop offset="1" stop-color="#a65d3d" />
+                </linearGradient>
+              </defs>
+              <!-- A quiet little fishing scene: two ordinary fish, a small gold mackerel, and a rod. -->
+              <path d="M202 15 154 121" fill="none" stroke="#5e402a" stroke-linecap="round" stroke-width="5" />
+              <path d="M203 16 156 120" fill="none" stroke="#c58c47" stroke-linecap="round" stroke-width="1.5" />
+              <path d="M191 40c-18 3-34 10-44 25-8 13-6 26-1 35" fill="none" stroke="#60727a" stroke-width="1.1" />
+              <path d="M146 100c-6 8-3 15 4 16 6 1 9-5 5-9" fill="none" stroke="#53636a" stroke-linecap="round" stroke-width="1.6" />
+
+              <g transform="translate(20 58) rotate(-8)">
+                <path d="M11 20 1 10c-3-3-6 1-4 4l4 7-4 7c-2 3 1 7 4 4l10-10Z" fill="#34778e" />
+                <path d="M11 20c6-13 23-18 42-13 9 2 16 7 21 13-5 7-12 11-21 13-19 5-36 0-42-13Z" fill="url(#blueFishBody)" stroke="#397c90" stroke-width="1.5" />
+                <path d="M31 9c4 7 6 14 4 22M43 8c4 8 5 16 3 25" fill="none" stroke="#397c90" stroke-linecap="round" stroke-width="2.5" opacity=".45" />
+                <circle cx="58" cy="16" r="2.7" fill="#24414b" /><circle cx="59" cy="15" r=".8" fill="#fff" />
+              </g>
+
+              <g transform="translate(143 49) rotate(8)">
+                <path d="M10 17 0 8c-3-3-6 0-4 4l4 6-4 6c-2 4 1 7 4 4l10-9Z" fill="#ad643f" />
+                <path d="M10 17c5-11 20-15 36-11 8 2 14 6 18 11-4 6-10 9-18 11-16 4-31 0-36-11Z" fill="url(#coralFishBody)" stroke="#a9613e" stroke-width="1.4" />
+                <path d="M26 8c3 6 4 12 3 18M36 7c3 6 4 13 2 20" fill="none" stroke="#a9613e" stroke-linecap="round" stroke-width="2.3" opacity=".42" />
+                <circle cx="50" cy="14" r="2.5" fill="#443530" /><circle cx="51" cy="13" r=".8" fill="#fff" />
+              </g>
+
+              <g transform="translate(83 84) rotate(-3) scale(.44)">
+                <path d="M42 70 13 43c-7-6-15 1-10 9l14 20-14 20c-5 8 3 15 10 9l29-27Z" fill="url(#goldFishTail)" opacity=".82" />
+                <path d="M42 70c16-37 58-52 117-38 27 6 51 20 63 38-12 18-36 32-63 38-59 14-101-1-117-38Z" fill="url(#goldFishBody)" stroke="#9f7429" stroke-width="2" />
+                <path d="M88 43c12 12 18 29 15 48M113 35c12 17 18 39 13 65M140 34c10 18 12 40 5 69" fill="none" stroke="#9f6e2b" stroke-linecap="round" stroke-width="5" opacity=".42" />
+                <circle cx="179" cy="59" r="5" fill="#263c3b" /><circle cx="181" cy="57" r="1.6" fill="#fff" />
+              </g>
+            </svg>
+            <img class="golden-mackerel-art" src="assets/main-fishing-scene.png" alt="고등어, 농어, 황금 고등어와 낚싯대 사진" />
+          </div>
+
+          <button class="primary-action" type="button" data-open="fishing">
+            <span class="action-icon">⚓</span> 낚시하기
+          </button>
+        </div>
+
+        <nav class="bottom-menu" aria-label="게임 메뉴">
+          <button class="menu-button" type="button" data-open="boats"><span class="menu-icon">⛵</span><span>배 구매</span></button>
+          <button class="menu-button" type="button" data-open="boatBook"><span class="menu-icon">⚓</span><span>배 도감</span></button>
+          <button class="menu-button wide" type="button" data-open="storage"><span class="menu-icon">▦</span><span>보관함</span></button>
+        </nav>
+      </section>
+
+      <section class="screen fishing-screen" data-screen="fishing" aria-label="낚시 화면">
+        <header class="screen-header">
+          <button class="back-button" type="button" data-back>← <span>바다 나가기</span></button>
+          <div class="header-stats"><span id="fishingBoatName">초보 낚시꾼</span><strong id="fishingCoins">0전</strong></div>
+        </header>
+        <div class="sea-scene" id="seaScene">
+          <div class="sun"></div><div class="cloud cloud-a"></div><div class="cloud cloud-b"></div>
+          <div class="distant-island"></div><div class="boat-art"><span class="mast"></span><span class="sail"></span><span class="hull"></span></div>
+          <div class="wave wave-one"></div><div class="wave wave-two"></div><div class="wave wave-three"></div>
+          <div class="bobber" id="bobber"><span></span></div>
+          <img class="water-fish fish-swim-one" src="assets/mackerel.png" alt="" /><img class="water-fish fish-swim-two" src="assets/seabass.png" alt="" />
+          <div class="fishing-prompt" id="fishingPrompt"><p>물결이 잔잔해요</p><strong>낚싯대를 던져 보세요!</strong></div>
+        </div>
+        <div class="fishing-controls">
+          <div class="cast-counter"><span>이번 배에서</span><strong id="stageCastCount">0</strong><span>번 낚시</span></div>
+          <button class="cast-button" id="castButton" type="button">낚싯대 던지기</button>
+        </div>
+      </section>
+
+      <section class="screen panel-screen" data-screen="fishBook" aria-label="물고기 도감">
+        <header class="panel-header"><button class="back-button" type="button" data-back>← <span>돌아가기</span></button><div><p>FISH COLLECTION</p><h2>물고기 도감</h2></div><span class="collection-count" id="collectionCount">0 / 15</span></header>
+        <div class="book-intro"><span class="book-badge">✦</span><p>한 번이라도 잡은 물고기는<br />팔아도 도감에 남아요.</p></div>
+        <div class="fish-book" id="fishBookList"></div>
+      </section>
+
+      <section class="screen panel-screen" data-screen="boats" aria-label="배 구매">
+        <header class="panel-header"><button class="back-button" type="button" data-back>← <span>돌아가기</span></button><div><p>BOAT SHOP</p><h2>배 구매</h2></div><strong class="panel-coins" id="boatShopCoins">0전</strong></header>
+        <div class="shop-hero"><span>⚓</span><div><p>더 먼 바다로 갈 준비가 되었나요?</p><strong>새 배를 구매하면 새로운 어종을 만날 수 있어요.</strong></div></div>
+        <div class="boat-shop" id="boatShopList"></div>
+      </section>
+
+      <section class="screen panel-screen" data-screen="boatBook" aria-label="배 도감">
+        <header class="panel-header"><button class="back-button" type="button" data-back>← <span>돌아가기</span></button><div><p>BOAT COLLECTION</p><h2>배 도감</h2></div><span class="collection-count" id="boatCount">0 / 4</span></header>
+        <div class="boat-book" id="boatBookList"></div>
+      </section>
+
+      <section class="screen panel-screen" data-screen="storage" aria-label="보관함">
+        <header class="panel-header"><button class="back-button" type="button" data-back>← <span>돌아가기</span></button><div><p>FISHING LOG</p><h2>보관함</h2></div><strong class="panel-coins" id="storageCoins">0전</strong></header>
+        <div class="storage-summary"><div><span>총 낚시 횟수</span><strong id="totalCatches">0회</strong></div><div><span>총 판매 금액</span><strong id="totalEarned">0전</strong></div></div>
+        <p class="storage-note">잡은 물고기는 바로 판매되어 전으로 바뀝니다.</p>
+        <div class="catch-log" id="catchLog"></div>
+      </section>
+    </main>
+
+    <div class="modal-backdrop" id="modalBackdrop" hidden>
+      <section class="modal catch-modal" id="catchModal" role="dialog" aria-modal="true" aria-labelledby="catchTitle" hidden>
+        <div class="sparkles">✦ ✧ ✦</div>
+        <img class="caught-fish-photo" id="caughtFishIcon" src="assets/mackerel.png" alt="잡은 물고기" />
+        <p class="rarity-label" id="caughtRarity">희귀</p>
+        <h2 id="catchTitle">전갱이를 잡았어요!</h2>
+        <p class="sell-message">자동으로 판매했어요</p>
+        <strong class="sale-price" id="salePrice">+20전</strong>
+        <button class="modal-button" type="button" data-close="catchModal">계속 낚시하기</button>
+      </section>
+
+      <section class="modal temperature-modal" id="temperatureModal" role="dialog" aria-modal="true" aria-labelledby="temperatureTitle" hidden>
+        <span class="temperature-icon">☀</span>
+        <p class="rarity-label">바다 소식</p>
+        <h2 id="temperatureTitle">수온 상승 알림</h2>
+        <div class="empty-temperature-note" aria-label="수온 상승 안내 내용은 아직 준비 중입니다"></div>
+        <button class="modal-button" type="button" data-close="temperatureModal">확인</button>
+      </section>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,193 @@
+const FISH = [
+  { id: 'horse-mackerel', name: '전갱이', rarity: '희귀', price: 20, image: 'assets/horse-mackerel.png', group: 'common' },
+  { id: 'mackerel', name: '고등어', rarity: '희귀', price: 10, image: 'assets/mackerel.png', group: 'common' },
+  { id: 'halfbeak', name: '학꽁치', rarity: '희귀', price: 25, image: 'assets/halfbeak.png', group: 'common' },
+  { id: 'seabass', name: '농어', rarity: '희귀', price: 30, image: 'assets/seabass.png', group: 'common' },
+  { id: 'red-seabream', name: '참돔', rarity: '레어', price: 150, image: 'assets/red-seabream.png', group: 'rare' },
+  { id: 'black-seabream', name: '감성돔', rarity: '레어', price: 100, image: 'assets/black-seabream.png', group: 'rare' },
+  { id: 'filefish', name: '쥐치', rarity: '레어', price: 80, image: 'assets/filefish.png', group: 'rare' },
+  { id: 'squid', name: '오징어', rarity: '레어', price: 70, image: 'assets/squid.png', group: 'rare' },
+  { id: 'yellowtail', name: '방어', rarity: '전설', price: 500, image: 'assets/yellowtail.png', group: 'legendary' },
+  { id: 'amberjack', name: '부시리', rarity: '전설', price: 750, image: 'assets/amberjack.png', group: 'legendary' },
+  { id: 'tuna', name: '참치', rarity: '전설', price: 1000, image: 'assets/tuna.png', group: 'legendary' },
+  { id: 'gold-mackerel', name: '황금 고등어', rarity: '황금', price: 200, image: 'assets/gold-mackerel.png', group: 'golden' },
+  { id: 'gold-yellowtail', name: '황금 방어', rarity: '황금', price: 3000, image: 'assets/gold-yellowtail.png', group: 'golden' },
+  { id: 'gold-tuna', name: '황금 참치', rarity: '황금', price: 10000, image: 'assets/gold-tuna.png', group: 'golden' },
+  { id: 'gold-squid', name: '황금 오징어', rarity: '황금', price: 2000, image: 'assets/gold-squid.png', group: 'golden' },
+];
+
+const BOATS = [
+  { id: 'starter', name: '초보 낚시꾼', price: 0, icon: '🛶', description: '희귀 어종과 황금 고등어를 만날 수 있어요.', groups: ['common'], golden: ['gold-mackerel'] },
+  { id: 'small', name: '소형 낚시배', price: 1000, icon: '⛵', description: '희귀와 레어 어종, 황금 고등어를 만날 수 있어요.', groups: ['common', 'rare'], golden: ['gold-mackerel'] },
+  { id: 'medium', name: '중형 낚시배', price: 3000, icon: '🚤', description: '희귀·레어·전설 어종, 황금 고등어를 만날 수 있어요.', groups: ['common', 'rare', 'legendary'], golden: ['gold-mackerel'] },
+  { id: 'large', name: '대형 낚시배', price: 15000, icon: '🛥️', description: '모든 물고기가 잡히는 최고의 낚시배예요.', groups: ['common', 'rare', 'legendary'], golden: ['gold-mackerel', 'gold-yellowtail', 'gold-tuna', 'gold-squid'] },
+];
+
+const RARITY_COLORS = { '희귀': '#519fc4', '레어': '#9a68cf', '전설': '#e67c50', '황금': '#d8a218' };
+const SAVE_KEY = 'blue-sea-fishing-save-v1';
+const defaultState = { coins: 0, boat: 'starter', ownedBoats: ['starter'], discovered: [], log: [], totalCatches: 0, totalEarned: 0, castsByBoat: { starter: 0 }, temperatureShown: [], soundOn: true };
+let state = loadState();
+let pendingTemperature = false;
+
+function loadState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(SAVE_KEY));
+    if (!saved) return structuredClone(defaultState);
+    const log = (saved.log || []).map((entry) => ({ ...entry, image: entry.image || FISH.find((fish) => fish.name === entry.name)?.image }));
+    return { ...defaultState, ...saved, log, castsByBoat: { starter: 0, ...(saved.castsByBoat || {}) } };
+  }
+  catch { return structuredClone(defaultState); }
+}
+function saveState() { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); }
+function formatCoins(value) { return `${value.toLocaleString('ko-KR')}전`; }
+function currentBoat() { return BOATS.find((boat) => boat.id === state.boat); }
+function fishById(id) { return FISH.find((fish) => fish.id === id); }
+
+function updateBalances() {
+  document.querySelectorAll('#coinDisplay, #fishingCoins, #boatShopCoins, #storageCoins').forEach((element) => { element.textContent = formatCoins(state.coins); });
+  document.querySelector('#fishingBoatName').textContent = currentBoat().name;
+  document.querySelector('#stageCastCount').textContent = state.castsByBoat[state.boat] || 0;
+  document.querySelector('#collectionCount').textContent = `${state.discovered.length} / ${FISH.length}`;
+  document.querySelector('#boatCount').textContent = `${state.ownedBoats.length} / ${BOATS.length}`;
+}
+
+function openScreen(name) {
+  document.querySelectorAll('.screen').forEach((screen) => screen.classList.toggle('active', screen.dataset.screen === name));
+  if (name === 'fishBook') renderFishBook();
+  if (name === 'boats') renderBoatShop();
+  if (name === 'boatBook') renderBoatBook();
+  if (name === 'storage') renderStorage();
+  updateBalances();
+}
+
+function goHome() { openScreen('home'); }
+
+function renderFishBook() {
+  document.querySelector('#fishBookList').innerHTML = FISH.map((fish) => {
+    const known = state.discovered.includes(fish.id);
+    return `<article class="fish-card ${known ? '' : 'unknown'}" style="--fish-color:${RARITY_COLORS[fish.rarity]}">
+      <span class="fish-rarity">${known ? fish.rarity : '???'}</span>
+      <div class="fish-info">${known ? `<img class="fish-photo" src="${fish.image}" alt="${fish.name} 사진" />` : '<span class="fish-icon unknown-icon">?</span>'}<div><h3 class="fish-name">${known ? fish.name : '비어 있음'}</h3><p class="fish-price">${known ? formatCoins(fish.price) : '아직 만나지 못한 물고기'}</p></div></div>
+    </article>`;
+  }).join('');
+}
+
+function boatRequirements(boat) {
+  const groups = { starter: '희귀 어종 + 황금 고등어', small: '희귀 + 레어 + 황금 고등어', medium: '희귀 + 레어 + 전설 + 황금 고등어', large: '희귀부터 황금까지 모든 어종' };
+  return groups[boat.id];
+}
+function renderBoatShop() {
+  document.querySelector('#boatShopList').innerHTML = BOATS.filter((boat) => boat.id !== 'starter').map((boat) => {
+    const owned = state.ownedBoats.includes(boat.id);
+    const canBuy = !owned && state.coins >= boat.price;
+    return `<article class="boat-card ${state.boat === boat.id ? 'current' : ''}">
+      <span class="boat-icon">${boat.icon}</span><div><h3>${boat.name}</h3><p>${boatRequirements(boat)}</p><strong class="boat-price">${formatCoins(boat.price)}</strong></div>
+      ${owned ? `<span class="owned-label">${state.boat === boat.id ? '사용 중' : '보유 중'}</span>` : `<button class="purchase-button" type="button" data-purchase="${boat.id}" ${canBuy ? '' : 'disabled'}>${canBuy ? '구매하기' : '전 부족'}</button>`}
+    </article>`;
+  }).join('');
+  document.querySelectorAll('[data-purchase]').forEach((button) => button.addEventListener('click', () => buyBoat(button.dataset.purchase)));
+}
+function renderBoatBook() {
+  document.querySelector('#boatBookList').innerHTML = BOATS.map((boat) => {
+    const owned = state.ownedBoats.includes(boat.id);
+    return `<article class="boat-card ${owned ? '' : 'locked'} ${state.boat === boat.id ? 'current' : ''}">
+      <span class="boat-icon">${owned ? boat.icon : '🔒'}</span><div><h3>${owned ? boat.name : '???'}</h3><p>${owned ? boat.description : '아직 구매하지 않은 낚시배입니다.'}</p><span class="unlock-state">${owned ? (state.boat === boat.id ? '현재 사용 중' : '보유 중') : `${formatCoins(boat.price)}에 구매 가능`}</span></div>
+    </article>`;
+  }).join('');
+}
+function renderStorage() {
+  document.querySelector('#totalCatches').textContent = `${state.totalCatches.toLocaleString('ko-KR')}회`;
+  document.querySelector('#totalEarned').textContent = formatCoins(state.totalEarned);
+  const log = document.querySelector('#catchLog');
+  if (!state.log.length) { log.innerHTML = '<div class="empty-log">아직 잡은 물고기가 없어요.<br />바다로 나가 첫 물고기를 낚아 보세요!</div>'; return; }
+  log.innerHTML = state.log.map((entry) => `<article class="log-item">${entry.image ? `<img class="log-photo" src="${entry.image}" alt="${entry.name} 사진" />` : `<span class="log-icon">${entry.icon || '🐟'}</span>`}<div class="log-main"><strong>${entry.name}</strong><span>${entry.rarity} · 자동 판매 완료</span></div><strong class="log-price">+${formatCoins(entry.price)}</strong></article>`).join('');
+}
+
+function buyBoat(id) {
+  const boat = BOATS.find((item) => item.id === id);
+  if (!boat || state.ownedBoats.includes(id) || state.coins < boat.price) return;
+  state.coins -= boat.price;
+  state.ownedBoats.push(id);
+  state.boat = id;
+  state.castsByBoat[id] = 0;
+  saveState();
+  renderBoatShop();
+  updateBalances();
+}
+
+function groupWeightsFor(boat) {
+  if (boat.id === 'starter') return { common: 99 };
+  if (boat.id === 'small') return { common: 66, rare: 33 };
+  if (boat.id === 'medium') return { common: 50, rare: 32, legendary: 17 };
+  return { common: 47, rare: 31, legendary: 18 };
+}
+function pickFish() {
+  const boat = currentBoat();
+  const weights = [];
+  const groupWeights = groupWeightsFor(boat);
+  Object.entries(groupWeights).forEach(([group, total]) => {
+    const fishInGroup = FISH.filter((fish) => fish.group === group);
+    fishInGroup.forEach((fish) => weights.push({ fish, weight: total / fishInGroup.length }));
+  });
+  // Each available golden fish has a fixed 1% chance. The non-golden groups above use the remaining chance.
+  boat.golden.forEach((id) => weights.push({ fish: fishById(id), weight: 1 }));
+  const roll = Math.random() * weights.reduce((sum, item) => sum + item.weight, 0);
+  let cursor = 0;
+  return weights.find((item) => (cursor += item.weight) >= roll).fish;
+}
+
+function playTone(frequency, duration = 0.1) {
+  if (!state.soundOn || !window.AudioContext) return;
+  const context = new AudioContext(); const oscillator = context.createOscillator(); const gain = context.createGain();
+  oscillator.frequency.value = frequency; gain.gain.setValueAtTime(.04, context.currentTime); gain.gain.exponentialRampToValueAtTime(.001, context.currentTime + duration);
+  oscillator.connect(gain).connect(context.destination); oscillator.start(); oscillator.stop(context.currentTime + duration);
+}
+function castLine() {
+  const button = document.querySelector('#castButton');
+  if (button.disabled) return;
+  button.disabled = true; button.textContent = '물고기를 기다리는 중…';
+  const bobber = document.querySelector('#bobber'); const prompt = document.querySelector('#fishingPrompt');
+  bobber.classList.add('active'); prompt.innerHTML = '<p>찰랑, 찰랑…</p><strong>입질을 기다리고 있어요</strong>';
+  playTone(390);
+  window.setTimeout(() => { bobber.classList.add('bite'); prompt.innerHTML = '<p>입질이다!</p><strong>지금 끌어올려요!</strong>'; playTone(590, .14); }, 780);
+  window.setTimeout(() => {
+    const fish = pickFish();
+    bobber.classList.remove('active', 'bite'); button.disabled = false; button.textContent = '낚싯대 던지기';
+    prompt.innerHTML = '<p>물결이 잔잔해요</p><strong>낚싯대를 던져 보세요!</strong>';
+    recordCatch(fish); openCatchModal(fish);
+  }, 1370);
+}
+function recordCatch(fish) {
+  state.coins += fish.price; state.totalCatches += 1; state.totalEarned += fish.price;
+  state.log.unshift({ id: fish.id, name: fish.name, rarity: fish.rarity, price: fish.price, image: fish.image }); state.log = state.log.slice(0, 30);
+  if (!state.discovered.includes(fish.id)) state.discovered.push(fish.id);
+  state.castsByBoat[state.boat] = (state.castsByBoat[state.boat] || 0) + 1;
+  if (state.castsByBoat[state.boat] === 10 && !state.temperatureShown.includes(state.boat)) { state.temperatureShown.push(state.boat); pendingTemperature = true; }
+  saveState(); updateBalances(); playTone(fish.rarity === '황금' ? 860 : 700, .2);
+}
+function openModal(id) { document.querySelector('#modalBackdrop').hidden = false; document.querySelector(`#${id}`).hidden = false; }
+function closeModal(id) {
+  document.querySelector(`#${id}`).hidden = true;
+  if (id === 'catchModal' && pendingTemperature) { pendingTemperature = false; openModal('temperatureModal'); return; }
+  if (!document.querySelectorAll('.modal:not([hidden])').length) document.querySelector('#modalBackdrop').hidden = true;
+}
+function openCatchModal(fish) {
+  const modal = document.querySelector('#catchModal');
+  modal.style.setProperty('--rarity', RARITY_COLORS[fish.rarity]);
+  document.querySelector('#caughtFishIcon').src = fish.image;
+  document.querySelector('#caughtFishIcon').alt = `${fish.name} 사진`;
+  document.querySelector('#caughtRarity').textContent = `${fish.rarity} 등급`;
+  document.querySelector('#caughtRarity').style.color = RARITY_COLORS[fish.rarity];
+  document.querySelector('#catchTitle').textContent = `${fish.name}을(를) 잡았어요!`;
+  document.querySelector('#salePrice').textContent = `+${formatCoins(fish.price)}`;
+  openModal('catchModal');
+}
+
+document.querySelectorAll('[data-open]').forEach((button) => button.addEventListener('click', () => openScreen(button.dataset.open)));
+document.querySelectorAll('[data-back]').forEach((button) => button.addEventListener('click', goHome));
+document.querySelector('#castButton').addEventListener('click', castLine);
+document.querySelectorAll('[data-close]').forEach((button) => button.addEventListener('click', () => closeModal(button.dataset.close)));
+document.querySelector('#soundButton').addEventListener('click', (event) => { state.soundOn = !state.soundOn; event.currentTarget.setAttribute('aria-pressed', String(state.soundOn)); event.currentTarget.textContent = state.soundOn ? '♪' : '×'; saveState(); });
+document.querySelector('#soundButton').setAttribute('aria-pressed', String(state.soundOn));
+document.querySelector('#soundButton').textContent = state.soundOn ? '♪' : '×';
+updateBalances();
