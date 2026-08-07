@@ -137,7 +137,7 @@
         <img class="caught-fish-photo" id="caughtFishIcon" src="assets/mackerel.png" alt="잡은 물고기" />
         <p class="rarity-label" id="caughtRarity">희귀</p>
         <h2 id="catchTitle">전갱이를 잡았어요!</h2>
-        <p class="sell-message">자동으로 판매했어요</p>
+        <p class="sell-message" id="catchMessage">자동으로 판매했어요</p>
         <strong class="sale-price" id="salePrice">+20전</strong>
         <button class="modal-button" type="button" data-close="catchModal">계속 낚시하기</button>
       </section>
@@ -146,7 +146,11 @@
         <span class="temperature-icon">☀</span>
         <p class="rarity-label">바다 소식</p>
         <h2 id="temperatureTitle">수온 상승 알림</h2>
-        <div class="empty-temperature-note" aria-label="수온 상승 안내 내용은 아직 준비 중입니다"></div>
+        <div class="temperature-note">
+          <p>수온이 올라 바다가 불안정해졌어요.</p>
+          <strong>다음 3번의 낚시에서는 해파리 또는 상어가 나타납니다.</strong>
+          <span>해파리 −50전 · 상어 −75전</span>
+        </div>
         <button class="modal-button" type="button" data-close="temperatureModal">확인</button>
       </section>
     </div>
