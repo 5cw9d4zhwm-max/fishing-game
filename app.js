@@ -232,6 +232,7 @@ document.querySelectorAll('[data-open]').forEach((button) => button.addEventList
 document.querySelectorAll('[data-back]').forEach((button) => button.addEventListener('click', goHome));
 document.querySelector('#castButton').addEventListener('click', castLine);
 document.querySelector('#reelButton').addEventListener('click', reelInFish);
+document.querySelector('#temperatureInfoButton').addEventListener('click', () => openModal('temperatureInfoModal'));
 document.querySelectorAll('[data-close]').forEach((button) => button.addEventListener('click', () => closeModal(button.dataset.close)));
 document.querySelector('#soundButton').addEventListener('click', (event) => { state.soundOn = !state.soundOn; event.currentTarget.setAttribute('aria-pressed', String(state.soundOn)); event.currentTarget.textContent = state.soundOn ? '♪' : '×'; saveState(); });
 document.querySelector('#soundButton').setAttribute('aria-pressed', String(state.soundOn));

@@ -18,9 +18,14 @@
         </header>
 
         <div class="home-content">
-          <button class="book-shortcut menu-button" type="button" data-open="fishBook">
-            <span class="menu-icon">▤</span><span>도감</span>
-          </button>
+          <div class="home-shortcuts">
+            <button class="book-shortcut menu-button" type="button" data-open="fishBook">
+              <span class="menu-icon">▤</span><span>도감</span>
+            </button>
+            <button class="temperature-info-shortcut menu-button" id="temperatureInfoButton" type="button">
+              <span class="menu-icon">🌡</span><span>수온 상승의 문제</span>
+            </button>
+          </div>
 
           <div class="title-card golden-fish-card" aria-label="황금 고등어 그림">
             <svg class="previous-fish-art" viewBox="0 0 240 140" role="img" aria-label="은은한 황금 고등어">
@@ -156,6 +161,18 @@
         </div>
         <p class="temperature-fact" id="temperatureFact" aria-live="polite"></p>
         <button class="modal-button" type="button" data-close="temperatureModal">확인</button>
+      </section>
+
+      <section class="modal temperature-problem-modal" id="temperatureInfoModal" role="dialog" aria-modal="true" aria-labelledby="temperatureInfoTitle" hidden>
+        <span class="temperature-icon">🌡</span>
+        <p class="rarity-label">BUSAN OCEAN REPORT</p>
+        <h2 id="temperatureInfoTitle">수온 상승의 문제</h2>
+        <div class="temperature-problem-copy">
+          <p>국립수산과학원의 최근 공식 발표 및 해양 환경 조사 데이터에 따르면, 1970년대 이후 부산 연안 및 앞바다의 수온 상승 추세가 전 지구 평균 상승 속도와 비교했을 때 최대 4배나 빠르고 가파르게 진행되고 있는 것으로 최종 확인되었다.</p>
+          <p>이와 같은 급격한 해수온 상승 현상은 부산 앞바다의 기존 생태계 균형을 완전히 흔들고 있다. 최근 부산 기장 연안을 대상으로 실시한 어획 실태조사에 따르면, 채집된 총 212종의 어류 중 아열대성 어종이 151종에 달하는 것으로 알려졌다. 이는 과거 2007년과 비교해 보면 약 71%가량 대폭 증가한 수치이다.</p>
+          <p>바다의 온도가 올라감에 따라 해양 생물들의 생태적 반응도 비정상적으로 급변하고 있다. 겨울철과 봄철 수온 상승으로 인해 독성을 지닌 노무라입깃해파리 등 독성 해파리류의 성장과 번식이 빨라져 예년보다 약 2주 이상 일찍 연안에 대량 유입되는 피해가 발생하고 있다. 또한 따뜻해진 바닷물을 따라 방어, 전갱이, 삼치 등 난류성 먹이 어종이 연안 깊숙이 들어오자, 이들을 추적하던 최상위 포식자인 상어류까지 부산 앞바다로 유입되는 등 연안 생태계 전체가 유기적으로 교란되는 심각한 이상 현상이 지속되고 있다.</p>
+        </div>
+        <button class="modal-button" type="button" data-close="temperatureInfoModal">확인</button>
       </section>
     </div>
 
