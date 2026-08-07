@@ -59,6 +59,9 @@ function fishById(id) { return FISH.find((fish) => fish.id === id); }
 function updateBalances() {
   document.querySelectorAll('#coinDisplay, #fishingCoins, #boatShopCoins, #storageCoins').forEach((element) => { element.textContent = formatCoins(state.coins); });
   document.querySelector('#fishingBoatName').textContent = currentBoat().name;
+  const boatArt = document.querySelector('#boatArt');
+  boatArt.className = `boat-art boat-${state.boat}`;
+  boatArt.setAttribute('aria-label', `${currentBoat().name} 모습`);
   document.querySelector('#stageCastCount').textContent = state.castsByBoat[state.boat] || 0;
   document.querySelector('#collectionCount').textContent = `${state.discovered.length} / ${FISH.length}`;
   document.querySelector('#boatCount').textContent = `${state.ownedBoats.length} / ${BOATS.length}`;
