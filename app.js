@@ -42,6 +42,7 @@ let pendingTemperature = false;
 let pendingCatch = null;
 let castInProgress = false;
 let biteTimer = null;
+let castMotionTimer = null;
 let escapeTimer = null;
 
 function loadState() {
@@ -171,9 +172,14 @@ function castLine() {
   castInProgress = true;
   button.disabled = true; button.hidden = true;
   reelButton.hidden = false; reelButton.disabled = false; reelButton.textContent = '릴 감기!';
-  const bobber = document.querySelector('#bobber'); const prompt = document.querySelector('#fishingPrompt');
-  bobber.classList.add('active'); prompt.innerHTML = '<p>찰랑, 찰랑…</p><strong>입질을 기다리고 있어요</strong>';
+  const bobber = document.querySelector('#bobber'); const rod = document.querySelector('#castingRod'); const prompt = document.querySelector('#fishingPrompt');
+  bobber.classList.add('casting'); rod.classList.add('throwing'); prompt.innerHTML = '<p>낚싯줄을 던졌어요!</p><strong>입질을 기다리고 있어요</strong>';
   playTone(390);
+  castMotionTimer = window.setTimeout(() => {
+    castMotionTimer = null;
+    if (!castInProgress) return;
+    bobber.classList.remove('casting'); bobber.classList.add('active'); rod.classList.remove('throwing');
+  }, 650);
   biteTimer = window.setTimeout(() => {
     biteTimer = null;
     if (!castInProgress) return;
@@ -192,10 +198,11 @@ function reelInFish() {
     if (castInProgress) {
       const button = document.querySelector('#castButton');
       const reelButton = document.querySelector('#reelButton');
-      const bobber = document.querySelector('#bobber');
+      const bobber = document.querySelector('#bobber'); const rod = document.querySelector('#castingRod');
       if (biteTimer !== null) { window.clearTimeout(biteTimer); biteTimer = null; }
+      if (castMotionTimer !== null) { window.clearTimeout(castMotionTimer); castMotionTimer = null; }
       castInProgress = false;
-      bobber.classList.remove('active', 'bite');
+      bobber.classList.remove('casting', 'active', 'bite'); rod.classList.remove('throwing');
       button.hidden = false; button.disabled = false; button.textContent = '낚싯대 던지기';
       reelButton.hidden = true; reelButton.disabled = true; reelButton.textContent = '릴 감기!';
       prompt.innerHTML = '<p>너무 빨리 릴을 감았어요!</p><strong>물고기를 잡지 못했어요. 낚싯줄을 회수했습니다.</strong>';
@@ -206,13 +213,14 @@ function reelInFish() {
   const fish = pendingCatch;
   const button = document.querySelector('#castButton');
   const reelButton = document.querySelector('#reelButton');
-  const bobber = document.querySelector('#bobber');
+  const bobber = document.querySelector('#bobber'); const rod = document.querySelector('#castingRod');
   if (escapeTimer !== null) { window.clearTimeout(escapeTimer); escapeTimer = null; }
   if (biteTimer !== null) { window.clearTimeout(biteTimer); biteTimer = null; }
+  if (castMotionTimer !== null) { window.clearTimeout(castMotionTimer); castMotionTimer = null; }
   pendingCatch = null;
   castInProgress = false;
   reelButton.disabled = true; reelButton.textContent = '끌어올리는 중…';
-  bobber.classList.remove('active', 'bite');
+  bobber.classList.remove('casting', 'active', 'bite'); rod.classList.remove('throwing');
   button.hidden = false; button.disabled = false; button.textContent = '낚싯대 던지기';
   reelButton.hidden = true; reelButton.textContent = '릴 감기!';
   prompt.innerHTML = '<p>물결이 잔잔해요</p><strong>낚싯대를 던져 보세요!</strong>';
@@ -222,9 +230,9 @@ function fishEscapes() {
   if (!pendingCatch) return;
   const button = document.querySelector('#castButton');
   const reelButton = document.querySelector('#reelButton');
-  const bobber = document.querySelector('#bobber'); const prompt = document.querySelector('#fishingPrompt');
-  pendingCatch = null; castInProgress = false; biteTimer = null; escapeTimer = null;
-  bobber.classList.remove('active', 'bite');
+  const bobber = document.querySelector('#bobber'); const rod = document.querySelector('#castingRod'); const prompt = document.querySelector('#fishingPrompt');
+  pendingCatch = null; castInProgress = false; biteTimer = null; castMotionTimer = null; escapeTimer = null;
+  bobber.classList.remove('casting', 'active', 'bite'); rod.classList.remove('throwing');
   button.hidden = false; button.disabled = false; button.textContent = '낚싯대 던지기';
   reelButton.hidden = true; reelButton.disabled = true; reelButton.textContent = '릴 감기!';
   prompt.innerHTML = '<p>너무 늦었어요!</p><strong>물고기가 도망갔어요. 다시 도전해 보세요.</strong>';
