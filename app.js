@@ -32,6 +32,7 @@ const SAVE_KEY = 'blue-sea-fishing-save-v1';
 const defaultState = { coins: 0, boat: 'starter', ownedBoats: ['starter'], discovered: [], log: [], totalCatches: 0, totalEarned: 0, castsByBoat: { starter: 0 }, temperatureShown: [], temperatureEventCasts: 0, soundOn: true };
 let state = loadState();
 let pendingTemperature = false;
+let pendingCatch = null;
 
 function loadState() {
   try {
@@ -151,18 +152,35 @@ function playTone(frequency, duration = 0.1) {
 }
 function castLine() {
   const button = document.querySelector('#castButton');
-  if (button.disabled) return;
+  const reelButton = document.querySelector('#reelButton');
+  if (button.disabled || pendingCatch) return;
   button.disabled = true; button.textContent = '물고기를 기다리는 중…';
+  reelButton.hidden = true; reelButton.disabled = true;
   const bobber = document.querySelector('#bobber'); const prompt = document.querySelector('#fishingPrompt');
   bobber.classList.add('active'); prompt.innerHTML = '<p>찰랑, 찰랑…</p><strong>입질을 기다리고 있어요</strong>';
   playTone(390);
-  window.setTimeout(() => { bobber.classList.add('bite'); prompt.innerHTML = '<p>입질이다!</p><strong>지금 끌어올려요!</strong>'; playTone(590, .14); }, 780);
   window.setTimeout(() => {
-    const fish = pickCatch();
-    bobber.classList.remove('active', 'bite'); button.disabled = false; button.textContent = '낚싯대 던지기';
-    prompt.innerHTML = '<p>물결이 잔잔해요</p><strong>낚싯대를 던져 보세요!</strong>';
-    recordCatch(fish); openCatchModal(fish);
-  }, 1370);
+    pendingCatch = pickCatch();
+    bobber.classList.add('bite');
+    prompt.innerHTML = '<p>입질이다!</p><strong>릴 감기! 버튼을 눌러 끌어올리세요</strong>';
+    button.hidden = true;
+    reelButton.hidden = false; reelButton.disabled = false; reelButton.focus();
+    playTone(590, .14);
+  }, 780);
+}
+function reelInFish() {
+  if (!pendingCatch) return;
+  const fish = pendingCatch;
+  const button = document.querySelector('#castButton');
+  const reelButton = document.querySelector('#reelButton');
+  const bobber = document.querySelector('#bobber'); const prompt = document.querySelector('#fishingPrompt');
+  pendingCatch = null;
+  reelButton.disabled = true; reelButton.textContent = '끌어올리는 중…';
+  bobber.classList.remove('active', 'bite');
+  button.hidden = false; button.disabled = false; button.textContent = '낚싯대 던지기';
+  reelButton.hidden = true; reelButton.textContent = '릴 감기!';
+  prompt.innerHTML = '<p>물결이 잔잔해요</p><strong>낚싯대를 던져 보세요!</strong>';
+  recordCatch(fish); openCatchModal(fish);
 }
 function recordCatch(fish) {
   state.coins += fish.price; state.totalCatches += 1; state.totalEarned += fish.price;
@@ -200,6 +218,7 @@ function openCatchModal(fish) {
 document.querySelectorAll('[data-open]').forEach((button) => button.addEventListener('click', () => openScreen(button.dataset.open)));
 document.querySelectorAll('[data-back]').forEach((button) => button.addEventListener('click', goHome));
 document.querySelector('#castButton').addEventListener('click', castLine);
+document.querySelector('#reelButton').addEventListener('click', reelInFish);
 document.querySelectorAll('[data-close]').forEach((button) => button.addEventListener('click', () => closeModal(button.dataset.close)));
 document.querySelector('#soundButton').addEventListener('click', (event) => { state.soundOn = !state.soundOn; event.currentTarget.setAttribute('aria-pressed', String(state.soundOn)); event.currentTarget.textContent = state.soundOn ? '♪' : '×'; saveState(); });
 document.querySelector('#soundButton').setAttribute('aria-pressed', String(state.soundOn));
